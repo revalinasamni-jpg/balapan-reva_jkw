@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Arena Kecepatan Reva</title>
+<style>
+:root{--bg:#f7fafd;--ink:#2f3e4e;--sub:#5b6b7c;--c1:#4a74a3;--c1s:#cfe0f3;--c2:#b07040;--c2s:#f8dec8;--c3:#55896c;--c3s:#d3eadb;--line:#dbe6f3;color-scheme:light}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.w{max-width:1000px;margin:0 auto;padding:18px 16px 40px}h1{margin:6px 0 2px;text-align:center;font-size:2.2rem}.sub{text-align:center;color:var(--sub);margin:0 0 18px;font-size:1.1rem}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.top h2{margin:0;font-size:1.6rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:#fff;border:2px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.menu{cursor:pointer;text-align:center}.menu .e{font-size:3rem}.menu b{display:block;font-size:1.3rem;margin:4px 0}.menu span{color:var(--sub)}
+button{background:var(--c1);color:#fff;border:0;border-radius:12px;padding:14px 20px;font-size:1.1rem;font-weight:700;cursor:pointer}button.o{background:#fff;color:var(--c1);border:2px solid var(--c1)}button.on{background:#f6c445;color:#5a4300;border-color:#f6c445}
+.tb{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.big{font-size:1.1rem;color:var(--sub);margin:12px 0 0}
+.lane{position:relative;height:66px;border-radius:14px;margin:8px 0;overflow:hidden}.lane .lb{position:absolute;left:10px;top:16px;font-weight:800;font-size:1.3rem}
+.veh{position:absolute;top:6px;font-size:2.5rem;transition:left .8s}.fin{position:absolute;right:0;top:0;bottom:0;width:12px;background:repeating-linear-gradient(#111 0 8px,#fff 8px 16px)}
+.q{font-size:1.6rem;font-weight:700;line-height:1.4;margin:12px 0}.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.op{border:3px solid var(--line);border-radius:14px;padding:16px;font-size:1.4rem;background:#fff}.op.ok{background:var(--c3s);border-color:var(--c3);font-weight:800}.op.no{background:#fdeeee;border-color:#d98a8a}.op.tap{cursor:pointer}
+.ans{background:#eef8f2;border-radius:12px;padding:12px 16px;margin-top:12px;color:#2f6f50;font-weight:700;font-size:1.15rem}
+.sc{display:flex;gap:10px;margin-bottom:12px}.sc div{flex:1;text-align:center;border-radius:14px;padding:10px;color:#fff;font-weight:800}.sc small{display:block;font-weight:600}.sc b{font-size:1.9rem}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.board .h{font-weight:800;text-align:center;color:var(--sub);padding:6px 0}.tile{padding:24px 0;text-align:center;border-radius:14px;background:var(--c1s);font-size:1.8rem;font-weight:800;color:var(--c1);cursor:pointer}.tile.d{background:#eee;color:#bbb;cursor:default}
+.mask{position:fixed;inset:0;background:rgba(30,45,60,.55);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}.mask .card{max-width:760px;width:100%;margin:0}
+.win{text-align:center;font-size:2rem;font-weight:800;margin:14px 0;color:var(--c2)}
+.tri{display:flex;align-items:center;gap:18px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:10px 16px;margin-bottom:12px}
+.tbx{width:96px;border:3px solid var(--c1);border-radius:12px;text-align:center;background:var(--c1s)}.ts{font-size:1.7rem;font-weight:800;color:var(--c1);border-bottom:3px solid var(--c1)}.tvt{display:flex}.tvt span{flex:1;font-size:1.7rem;font-weight:800;padding:2px}.tvt span+span{border-left:3px solid var(--c1)}
+.fm{display:flex;gap:22px;flex-wrap:wrap}.fm b{font-size:1.6rem}
+.timer{font-size:1.7rem;font-weight:800;text-align:center;margin:14px 0 6px}.timer.hot{color:#d14b4b}
+.teams{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.tbox{border:3px solid;border-radius:16px;padding:12px;text-align:center}.abcd{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.abcd button{background:#fff;color:var(--ink);border:3px solid var(--line);font-size:1.5rem;padding:12px 0}.abcd button.sel{background:#f6c445;border-color:#e0a800;color:#5a4300}.stt{font-weight:700;min-height:1.4em}
+@media(max-width:600px){.teams{grid-template-columns:1fr}}
+@media(max-width:600px){.board{grid-template-columns:repeat(2,1fr)}.opts{grid-template-columns:1fr}h1{font-size:1.6rem}.q{font-size:1.3rem}}
+</style></head><body><div class="w" id="app"></div>
+<script>
+const app=document.getElementById('app'),$=id=>document.getElementById(id);
+const TM=[{n:'Kelompok 1',c:'var(--c1)',s:'var(--c1s)'},{n:'Kelompok 2',c:'var(--c2)',s:'var(--c2s)'},{n:'Kelompok 3',c:'var(--c3)',s:'var(--c3s)'}];
+const head=t=>'<div class="top"><h2>'+t+'</h2><button class="o" onclick="home()">🏠 Menu</button></div>';
+// ===== SOAL PILIHAN GANDA (tetap). Format: [soal,[A,B,C,D],indeks benar,pembahasan]
+const RR=[
+ {e:'🚗',n:'Mobil',l:'Jalan raya',q:['Mobil melaju 40 km/jam selama 2 jam. Berapa jarak yang ditempuh?',['20 km','80 km','42 km','38 km'],1,'Jarak = kecepatan × waktu = 40 × 2 = 80 km']},
+ {e:'🚲',n:'Sepeda',l:'Jalur sepeda',q:['Sepeda menempuh 60 m dalam 10 detik. Berapa kecepatannya?',['6 m/detik','50 m/detik','600 m/detik','70 m/detik'],0,'Kecepatan = jarak ÷ waktu = 60 ÷ 10 = 6 m/detik']},
+ {e:'🚆',n:'Kereta',l:'Rel kereta',q:['Kereta menempuh 120 km dengan kecepatan 60 km/jam. Berapa lama perjalanannya?',['180 jam','2 jam','60 jam','7.200 jam'],1,'Waktu = jarak ÷ kecepatan = 120 ÷ 60 = 2 jam']},
+ {e:'⛵',n:'Perahu',l:'Sungai',q:['Perahu melaju 3 m/detik selama 10 detik. Berapa jarak yang ditempuh?',['13 m','7 m','30 m','0,3 m'],2,'Jarak = 3 × 10 = 30 m']},
+ {e:'✈️',n:'Pesawat',l:'Langit',q:['Pesawat terbang 500 km/jam selama 2 jam. Berapa jarak yang ditempuh?',['250 km','502 km','1.000 km','498 km'],2,'Jarak = 500 × 2 = 1.000 km']},
+ {e:'🐇',n:'Kelinci',l:'Padang rumput',q:['Kelinci berlari 4 m/detik. Berapa lama untuk menempuh 20 m?',['80 detik','5 detik','24 detik','16 detik'],1,'Waktu = 20 ÷ 4 = 5 detik']}];
+const CAT=['Kecepatan','Jarak','Waktu','Satuan'];
+const PB=[
+ [['Pelari menempuh 100 m dalam 20 detik. Berapa kecepatannya?',['5 m/detik','80 m/detik','120 m/detik','2.000 m/detik'],0,'100 ÷ 20 = 5 m/detik'],['Motor menempuh 150 km dalam 3 jam. Berapa kecepatannya?',['450 km/jam','147 km/jam','50 km/jam','153 km/jam'],2,'150 ÷ 3 = 50 km/jam'],['Bus berangkat 08.00, tiba 12.00, menempuh 240 km. Berapa kecepatannya?',['60 km/jam','20 km/jam','120 km/jam','80 km/jam'],0,'Waktu 4 jam. 240 ÷ 4 = 60 km/jam']],
+ [['Kecepatan 6 m/detik selama 10 detik. Berapa jaraknya?',['16 m','60 m','4 m','0,6 m'],1,'6 × 10 = 60 m'],['Mobil 70 km/jam selama 2 jam. Berapa jaraknya?',['35 km','72 km','140 km','68 km'],2,'70 × 2 = 140 km'],['Motor 40 km/jam, berangkat 07.00, tiba 09.00. Berapa jaraknya?',['80 km','20 km','49 km','160 km'],0,'Waktu 2 jam. 40 × 2 = 80 km']],
+ [['Jarak 200 m, kecepatan 8 m/detik. Berapa waktunya?',['1.600 detik','25 detik','192 detik','208 detik'],1,'200 ÷ 8 = 25 detik'],['Jarak 180 km, kecepatan 60 km/jam. Berapa waktunya?',['3 jam','120 jam','240 jam','10.800 jam'],0,'180 ÷ 60 = 3 jam'],['Berangkat 06.00, jarak 90 km, kecepatan 45 km/jam. Pukul berapa tiba?',['Pukul 07.00','Pukul 08.00','Pukul 09.00','Pukul 10.00'],1,'90 ÷ 45 = 2 jam. 06.00 + 2 jam = 08.00']],
+ [['1 km sama dengan berapa meter?',['10 m','100 m','1.000 m','10.000 m'],2,'1 km = 1.000 m'],['3 menit sama dengan berapa detik?',['30 detik','90 detik','120 detik','180 detik'],3,'3 × 60 = 180 detik'],['Jarak 1,2 km dengan kecepatan 4 m/detik. Berapa menit waktunya?',['3 menit','5 menit','30 menit','300 menit'],1,'1,2 km = 1.200 m. 1.200 ÷ 4 = 300 detik = 5 menit']]];
+const TP=[{a:['🚗 Mobil A',100,5],b:['🚙 Mobil B',100,4],h:'Jarak sama, kecepatan berbeda'},{a:['🚲 Sepeda',100,4],b:['🛵 Motor',60,3],h:'Jarak dan kecepatan berbeda!'},{a:['🏃 Andi',120,6],b:['🏃 Budi',80,4],h:'Awas, jaraknya tidak sama'},{a:['🐇 Kelinci',90,3],b:['🐢 Kura-kura',20,1],h:'Kelinci lawan kura-kura'}];
+const KK=[['Kereta menempuh 360 km dalam 4 jam. Berapa kecepatannya?',['40 km/jam','90 km/jam','364 km/jam','1.440 km/jam'],1],['Sepeda menempuh 48 m dalam 8 detik. Berapa kecepatannya?',['40 m/detik','56 m/detik','6 m/detik','384 m/detik'],2],['Mobil 55 km/jam selama 2 jam. Berapa jaraknya?',['110 km','57 km','27,5 km','53 km'],0],['Burung terbang 12 m/detik selama 5 detik. Berapa jaraknya?',['17 m','60 m','7 m','2,4 m'],1],['Jarak 150 m, kecepatan 5 m/detik. Berapa waktunya?',['30 detik','145 detik','750 detik','155 detik'],0],['Jarak 360 km, kecepatan 90 km/jam. Berapa waktunya?',['450 jam','270 jam','4 jam','32.400 jam'],2],['Pelari 4 m/detik selama 10 detik. Berapa jaraknya?',['40 m','14 m','6 m','2,5 m'],0],['5 km sama dengan berapa meter?',['50 m','500 m','5.000 m','50.000 m'],2],['Berangkat 09.00, tiba 11.00, jarak 100 km. Berapa kecepatannya?',['200 km/jam','50 km/jam','102 km/jam','98 km/jam'],1],['Berangkat 13.00, jarak 120 km, 40 km/jam. Pukul berapa tiba?',['Pukul 14.00','Pukul 15.00','Pukul 16.00','Pukul 17.00'],2]];
+let tm,r,pos,sc,used,cur,st,ti,qk,qi,ok,t0;
+function home(){clearInterval(tm);app.innerHTML='<h1>🏆 Arena Kecepatan Reva</h1><p class="sub">Pilih permainan. Setiap permainan punya gaya yang berbeda!</p><div class="grid">'+
+ [['race','🏁','Balapan Kelompok','Kendaraan berganti tiap ronde'],['tebak','🔮','Tebak Pemenang','Tebak dulu, lalu lihat hasilnya'],['kuis','⚡','Kuis Kilat Mandiri','5 soal cepat di HP, berhadiah']].map(m=>'<div class="card menu" onclick="'+m[0]+'()"><div class="e">'+m[1]+'</div><b>'+m[2]+'</b><span>'+m[3]+'</span></div>').join('')+'</div>';}
+// kotak soal: soal, pilihan A-D, tombol buka jawaban, pembahasan, pemberian bintang
+function qbox(q,nx,lb){st=[0,0,0];return '<div class="q">'+q[0]+'</div><div class="opts">'+q[1].map((o,i)=>'<div class="op" id="o'+i+'"><b>'+'ABCD'[i]+'.</b> '+o+'</div>').join('')+'</div><div class="tb"><button class="o" onclick="rv('+q[2]+')">👀 Buka jawaban</button></div><div class="ans" id="pb" style="display:none">✅ '+q[3]+'</div><div id="sg" style="display:none"><p class="big">Sentuh kelompok yang wakilnya menjawab benar untuk memberi bintang:</p><div class="tb">'+TM.map((t,i)=>'<button class="o" id="s'+i+'" onclick="tg('+i+')">⭐ '+t.n+'</button>').join('')+'</div><div class="tb"><button onclick="'+nx+'">'+lb+'</button></div></div>';}
+function rv(c){$('o'+c).classList.add('ok');$('pb').style.display='block';$('sg').style.display='block';}
+function tg(i){st[i]=1-st[i];$('s'+i).classList.toggle('on');}
+const bar=a=>'<div class="sc">'+TM.map((t,i)=>'<div style="background:'+t.c+'"><small>'+t.n+'</small><b>'+a[i]+'</b></div>').join('')+'</div>';
+// 1 BALAPAN KELOMPOK: tiap kelompok menjawab sendiri di kotak A-D, ada waktu mengerjakan (ubah TW untuk mengganti lamanya, dalam detik)
+const TW=45;let ans,lk,tl;
+const tri=()=>'<div class="tri"><div class="tbx"><div class="ts">s</div><div class="tvt"><span style="color:var(--c2)">v</span><span style="color:var(--c3)">t</span></div></div><div class="fm"><b>v = s ÷ t</b><b>s = v × t</b><b>t = s ÷ v</b></div></div>';
+function race(){r=0;pos=[0,0,0];rr();}
+function rr(){const R=RR[r],q=R.q;ans=[null,null,null];lk=false;tl=TW;clearInterval(tm);
+ app.innerHTML=head('🏁 Balapan Kelompok')+tri()+bar(pos)+'<div class="card"><b style="font-size:1.2rem">Ronde '+(r+1)+' dari 6 • '+R.e+' '+R.n+' di '+R.l+'</b>'+
+ TM.map((t,i)=>'<div class="lane" style="background:'+t.s+'"><span class="lb" style="color:'+t.c+'">'+(i+1)+'</span><span class="veh" id="vh'+i+'" style="left:calc(7% + '+pos[i]*12+'%)">'+R.e+'</span><i class="fin"></i></div>').join('')+
+ '<div class="q">'+q[0]+'</div><div class="opts">'+q[1].map((o,i)=>'<div class="op" id="o'+i+'"><b>'+'ABCD'[i]+'.</b> '+o+'</div>').join('')+'</div>'+
+ '<div class="timer" id="tmr">⏱ <span id="tl">'+tl+'</span> detik</div><div class="teams">'+TM.map((t,i)=>'<div class="tbox" style="border-color:'+t.c+';background:'+t.s+'"><b style="color:'+t.c+'">'+t.n+'</b><div class="abcd">'+[0,1,2,3].map(k=>'<button id="b'+i+k+'" onclick="pick('+i+','+k+')">'+'ABCD'[k]+'</button>').join('')+'</div><div class="stt" id="st'+i+'">Belum menjawab</div></div>').join('')+'</div>'+
+ '<div class="ans" id="pb" style="display:none">✅ '+q[3]+'</div><div class="tb"><button class="o" id="rvb" onclick="lockQ()">⏩ Buka jawaban sekarang</button><button id="nxb" style="display:none" onclick="rn()">'+(r<5?'Soal berikutnya →':'Lihat juara')+'</button></div></div>';
+ tm=setInterval(()=>{tl--;$('tl').textContent=Math.max(tl,0);if(tl<=10)$('tmr').classList.add('hot');if(tl<=0)lockQ();},1000);}
+function pick(i,k){if(lk)return;ans[i]=k;[0,1,2,3].forEach(x=>$('b'+i+x).classList.toggle('sel',x==k));$('st'+i).textContent='✓ Sudah menjawab';}
+function lockQ(){if(lk)return;lk=true;clearInterval(tm);const q=RR[r].q;$('o'+q[2]).classList.add('ok');$('pb').style.display='block';$('rvb').style.display='none';$('nxb').style.display='inline-block';
+ ans.forEach((a,i)=>{const e=$('st'+i);if(a===q[2]){pos[i]++;e.innerHTML='✅ Benar! +1 ⭐';}else e.innerHTML=a===null?'⏰ Tidak menjawab':'❌ Salah (menjawab '+'ABCD'[a]+')';$('vh'+i).style.left='calc(7% + '+pos[i]*12+'%)';});
+ document.querySelector('.sc').outerHTML=bar(pos);}
+function rn(){r++;if(r<6)return rr();const m=Math.max(...pos),w=TM.filter((t,i)=>pos[i]==m).map(t=>t.n).join(' & ');
+ app.innerHTML=head('🏁 Balapan Kelompok')+'<div class="card"><div class="win">🏆 Juara: '+w+'!</div>'+bar(pos)+'<p class="big" style="text-align:center">Jumlah bintang tiap kelompok</p><div class="tb"><button onclick="race()">Main lagi</button></div></div>';}
+// 2 PAPAN TANTANGAN
+function papan(){sc=[0,0,0];used={};pp();}
+function pp(){let h='<div class="board">'+CAT.map(c=>'<div class="h">'+c+'</div>').join('');
+ for(let l=0;l<3;l++)for(let c=0;c<4;c++){const k=c+'-'+l;h+='<div class="tile'+(used[k]?' d':'')+'" '+(used[k]?'':'onclick="pk('+c+','+l+')"')+'>'+(l+1)*10+'</div>';}
+ app.innerHTML=head('🧩 Papan Tantangan')+bar(sc)+h+'</div>';}
+function pk(c,l){cur=[c,l];const d=document.createElement('div');d.className='mask';d.id='m';d.innerHTML='<div class="card"><b style="font-size:1.2rem">'+CAT[c]+' • '+(l+1)*10+' poin</b>'+qbox(PB[c][l],'pw()','Selesai →')+'</div>';document.body.appendChild(d);}
+function pw(){st.forEach((v,i)=>sc[i]+=v*(cur[1]+1)*10);used[cur[0]+'-'+cur[1]]=1;$('m').remove();pp();}
+// 3 TEBAK PEMENANG
+function tebak(){ti=0;tt();}
+function tt(){const S=TP[ti];app.innerHTML=head('🔮 Tebak Pemenang')+'<div class="card"><b style="font-size:1.2rem">Skenario '+(ti+1)+' dari 4 • '+S.h+'</b>'+
+ [S.a,S.b].map((p,i)=>'<p class="big">'+p[0]+': jarak '+p[1]+' m, kecepatan '+p[2]+' m/detik</p><div class="lane" style="background:'+TM[i*2].s+'"><span class="veh" id="v'+i+'" style="left:2%">'+p[0].split(' ')[0]+'</span><i class="fin"></i></div>').join('')+
+ '<div class="q">Siapa yang lebih dulu sampai?</div><div class="opts">'+[S.a[0],S.b[0],'Sampai bersamaan'].map((o,i)=>'<div class="op" id="o'+i+'"><b>'+'ABC'[i]+'.</b> '+o+'</div>').join('')+'</div><div class="tb"><button onclick="tgo()">▶ Jalankan</button><button class="o" onclick="ti=(ti+1)%4;tt()">Skenario berikutnya →</button></div><div class="ans" id="tr" style="display:none"></div></div>';}
+function tgo(){const S=TP[ti],T=[S.a[1]/S.a[2],S.b[1]/S.b[2]];let t=0;clearInterval(tm);tm=setInterval(()=>{t+=0.2;[0,1].forEach(i=>$('v'+i).style.left=(2+Math.min(1,t/T[i])*80)+'%');
+ if(t>=Math.max(...T)){clearInterval(tm);const c=T[0]<T[1]?0:T[1]<T[0]?1:2,f=x=>(Math.round(x*10)/10+'').replace('.',',');$('o'+c).classList.add('ok');const e=$('tr');e.style.display='block';
+ e.innerHTML='✅ '+['Pemenang: '+S.a[0],'Pemenang: '+S.b[0],'Keduanya sampai bersamaan'][c]+'<br><small>'+S.a[0]+': '+S.a[1]+' ÷ '+S.a[2]+' = '+f(T[0])+' detik<br>'+S.b[0]+': '+S.b[1]+' ÷ '+S.b[2]+' = '+f(T[1])+' detik</small>';}},50);}
+// 4 KUIS KILAT MANDIRI
+function kuis(){app.innerHTML=head('⚡ Kuis Kilat Mandiri')+'<div class="card"><div class="q">5 soal pilihan ganda. Sentuh jawaban yang benar. Tunjukkan skor akhirmu ke guru untuk hadiah!</div><button onclick="kmulai()">Mulai</button></div>';}
+function kmulai(){qk=[...KK].sort(()=>Math.random()-.5).slice(0,5);qi=0;ok=0;t0=Date.now();kq();}
+function kq(){const q=qk[qi];app.innerHTML=head('⚡ Kuis Kilat Mandiri')+'<div class="card"><b>Soal '+(qi+1)+' dari 5</b><div class="q">'+q[0]+'</div><div class="opts">'+q[1].map((o,i)=>'<div class="op tap" id="o'+i+'" onclick="ka('+i+')"><b>'+'ABCD'[i]+'.</b> '+o+'</div>').join('')+'</div><div id="kf"></div></div>';}
+function ka(i){const q=qk[qi];if($('kf').innerHTML)return;if(i==q[2])ok++;else $('o'+i).classList.add('no');$('o'+q[2]).classList.add('ok');
+ $('kf').innerHTML='<div class="ans">'+(i==q[2]?'✅ Benar!':'❌ Jawaban yang benar: '+'ABCD'[q[2]])+'</div><div class="tb"><button onclick="kn()">'+(qi<4?'Soal berikutnya →':'Lihat skor')+'</button></div>';}
+function kn(){qi++;if(qi<5)return kq();const s=Math.round((Date.now()-t0)/1000);app.innerHTML=head('⚡ Kuis Kilat Mandiri')+'<div class="card"><div class="win">Skor: '+ok+' dari 5</div><p class="big" style="text-align:center">Waktu: '+s+' detik'+(ok==5?'<br>🎉 Sempurna! Tunjukkan layar ini ke guru.':ok>=3?'<br>Bagus! Tunjukkan layar ini ke guru.':'<br>Ayo coba lagi!')+'</p><div class="tb"><button onclick="kmulai()">Main lagi</button></div></div>';}
+const GO={race:race,tebak:tebak,kuis:kuis};(GO[(location.hash||'').slice(1)]||home)();
+</script></body></html>
